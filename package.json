@@ -1,18 +1,21 @@
 {
   "name": "JATE",
   "version": "1.0.0",
-  "description": "",
+  "description": "Just Another Text Editor - A Progressive Web Application",
   "main": "server.js",
   "scripts": {
-    "start:dev": "",
-    "start": "",
-    "server": "",
-    "build": "",
-    "install": "",
-    "client": ""
+    "start": "node server/server.js",
+    "start:dev": "nodemon server/server.js",
+    "build": "webpack --config webpack.config.js",
+    "client": "webpack --watch"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "text-editor",
+    "pwa",
+    "javascript",
+    "code-mirror"
+  ],
+  "author": "Jonathan Gomez",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
@@ -20,6 +23,15 @@
   },
   "devDependencies": {
     "concurrently": "^5.2.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0",
+    "html-webpack-plugin": "^5.0.0",
+    "workbox-webpack-plugin": "^6.0.0",
+    "webpack-pwa-manifest": "^4.0.0",
+    "babel-loader": "^8.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "style-loader": "^3.0.0",
+    "css-loader": "^6.0.0"
   }
 }
