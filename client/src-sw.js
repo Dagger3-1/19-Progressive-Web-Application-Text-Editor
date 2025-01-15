@@ -1,22 +1,42 @@
-// Import the Workbox libraries
-import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
-import { CacheFirst } from 'workbox-strategies';
-import { ExpirationPlugin } from 'workbox-expiration';
-import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+const { offlineFallback, warmStrategyCache } = require('workbox-recipes');
+const { CacheFirst } = require('workbox-strategies');
+const { registerRoute } = require('workbox-routing');
+const { CacheableResponsePlugin } = require('workbox-cacheable-response');
+const { ExpirationPlugin } = require('workbox-expiration');
+const { precacheAndRoute } = require('workbox-precaching/precacheAndRoute');
+const { StaleWhileRevalidate } = require('workbox-strategies');
 
-// Precaching
 precacheAndRoute(self.__WB_MANIFEST);
 
-// Cache CSS, JS, and HTML files with StaleWhileRevalidate strategy
+const pageCache = new CacheFirst({
+  cacheName: 'page-cache',
+  plugins: [
+    new CacheableResponsePlugin({
+      statuses: [0, 200],
+    }),
+    new ExpirationPlugin({
+      maxAgeSeconds: 30 * 24 * 60 * 60,
+    }),
+  ],
+});
+
+warmStrategyCache({
+  urls: ['/index.html', '/'],
+  strategy: pageCache,
+});
+
+registerRoute(({ request }) => request.mode === 'navigate', pageCache);
+
+// TODO: Implement asset caching
+
 registerRoute(
-  ({ request }) => request.destination === 'style' ||
-                   request.destination === 'script' ||
-                   request.destination === 'document',
+  // Here we define the callback function that will filter the requests we want to cache (in this case, JS and CSS files)
+  ({ request }) => ['style', 'script', 'worker'].includes(request.destination),
   new StaleWhileRevalidate({
-    cacheName: 'assets-cache',
+    // Name of the cache storage.
+    cacheName: 'asset-cache',
     plugins: [
+      // This plugin will cache responses with these headers to a maximum-age of 30 days
       new CacheableResponsePlugin({
         statuses: [0, 200],
       }),
@@ -24,19 +44,3 @@ registerRoute(
   })
 );
 
-// Cache image files with CacheFirst strategy
-registerRoute(
-  ({ request }) => request.destination === 'image',
-  new CacheFirst({
-    cacheName: 'image-cache',
-    plugins: [
-      new CacheableResponsePlugin({
-        statuses: [0, 200],
-      }),
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-      }),
-    ],
-  })
-);
